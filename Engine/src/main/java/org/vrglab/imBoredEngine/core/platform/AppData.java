@@ -3,14 +3,18 @@ package org.vrglab.imBoredEngine.core.platform;
 import com.google.common.base.Suppliers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import static org.vrglab.imBoredEngine.core.utils.IoUtils.hasFile;
 
 public class AppData {
 
@@ -20,6 +24,7 @@ public class AppData {
     private static final Supplier<Boolean> DEBUG_MODE = Suppliers.memoize(AppData::detectDebugMode);
     private static final Supplier<Boolean> TEST_ENV = Suppliers.memoize(AppData::detectJUnitEnv);
     private static final Supplier<Boolean> RELEASE_MODE = Suppliers.memoize(() -> !isDebug() && !isTest());
+    private static final Supplier<Boolean> EDITOR_MODE = Suppliers.memoize(() -> isEditorMode());
     private static final Supplier<String> RUNTIME_PATH = Suppliers.memoize(AppData::detectRuntimePath);
     private static final Supplier<String> VERSION = Suppliers.memoize(AppData::detectVersion);
     private static final Supplier<String> JVM_INFO = Suppliers.memoize(AppData::detectJvmInfo);
@@ -41,7 +46,7 @@ public class AppData {
     public static boolean isDebug() { return DEBUG_MODE.get(); }
     public static boolean isTest() { return TEST_ENV.get(); }
     public static boolean isRelease() { return RELEASE_MODE.get(); }
-
+    public static boolean isEditor() { return EDITOR_MODE.get(); }
     public static String getRuntimePath() { return RUNTIME_PATH.get(); }
     public static String getVersion() { return VERSION.get(); }
     public static String getJvmInfo() { return JVM_INFO.get(); }
@@ -134,6 +139,15 @@ public class AppData {
         }
     }
 
+    private static boolean isEditorMode() {
+        try {
+            return !hasFile(Path.of(AppData.getRuntimePath()), "*.vibe");
+        } catch (IOException e) {
+            CrashHandler.HandleException(e);
+            return false;
+        }
+    }
+
     // ------------------------------------------------------------------------
     // Utility / Logging
     // ------------------------------------------------------------------------
@@ -142,6 +156,7 @@ public class AppData {
     public static void logEnvironmentSummary() {
         LOGGER.info("=== Engine Environment Summary ===");
         LOGGER.info("Mode: {}", isTest() ? "TEST" : isDebug() ? "DEBUG" : "RELEASE");
+        LOGGER.info("Editor Environment: {}", isEditor());
         LOGGER.info("Runtime Path: {}", getRuntimePath());
         LOGGER.info("Version: {}", getVersion());
         LOGGER.info("JVM: {} ({})", getJvmInfo(), getJvmVendor());

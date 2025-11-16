@@ -8,9 +8,11 @@ import io.github.libsdl4j.api.video.SDL_WindowFlags;
 import io.github.libsdl4j.api.video.SdlVideo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.vrglab.imBoredEngine.core.game.GameLoader;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringLoop;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringShutdown;
+import org.vrglab.imBoredEngine.core.platform.AppInfo;
 
 import static io.github.libsdl4j.api.event.SDL_EventType.SDL_QUIT;
 import static io.github.libsdl4j.api.event.SdlEvents.SDL_PollEvent;
@@ -36,7 +38,7 @@ public class Windowing {
        }
         LOGGER.info("SDL2 initialized");
 
-        window_instance = SDL_CreateWindow("Demo SDL2",
+        window_instance = SDL_CreateWindow(GameLoader.getAppInfo().getName(),
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
                 1024, 768,
@@ -80,7 +82,7 @@ public class Windowing {
     }
 
 
-    @CalledDuringInit(priority = 2)
+    @CalledDuringInit(priority = 50)
     private static void Initialize() {
         instance = new Windowing();
     }

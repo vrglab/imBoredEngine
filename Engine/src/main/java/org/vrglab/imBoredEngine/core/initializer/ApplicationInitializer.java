@@ -1,19 +1,17 @@
 package org.vrglab.imBoredEngine.core.initializer;
 
-import io.github.libsdl4j.api.video.SdlVideo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
-import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
+import org.vrglab.imBoredEngine.core.debugging.MemoryAppender;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.Windowing;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringLoop;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringShutdown;
-import org.vrglab.imBoredEngine.core.platform.CrashHandler;
+import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -65,6 +63,7 @@ public class ApplicationInitializer {
     }
 
     private static void init_Engine() {
+        MemoryAppender.attach();
         Set<Method> methods = reflections.getMethodsAnnotatedWith(CalledDuringInit.class);
 
         Map<Integer, Method> methodMap = new TreeMap<>();
