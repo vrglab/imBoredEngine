@@ -1,1 +1,4 @@
 rootProject.name = 'ImBoredEngine'
+
+include 'Engine'
+include 'VibeBuilder'

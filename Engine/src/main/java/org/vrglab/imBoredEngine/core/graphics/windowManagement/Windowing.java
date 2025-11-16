@@ -8,7 +8,6 @@ import io.github.libsdl4j.api.video.SDL_WindowFlags;
 import io.github.libsdl4j.api.video.SdlVideo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.vrglab.imBoredEngine.core.initializer.ApplicationInitializer;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringLoop;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringShutdown;
@@ -63,8 +62,11 @@ public class Windowing {
     }
 
     public void Quite() {
-        if(sdl_initialized) {
+        if(instance != null) {
             SdlVideo.SDL_DestroyWindow(window_instance);
+        }
+
+        if(sdl_initialized) {
             Sdl.SDL_Quit();
         }
     }
@@ -90,6 +92,8 @@ public class Windowing {
 
     @CalledDuringShutdown(priority = 0)
     private static void Shutdown() {
-        instance.Quite();
+        if(instance != null) {
+            instance.Quite();
+        }
     }
 }

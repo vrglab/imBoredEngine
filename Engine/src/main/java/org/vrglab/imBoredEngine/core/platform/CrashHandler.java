@@ -32,7 +32,7 @@ public class CrashHandler {
      * Handles uncaught exceptions.
      */
     private static void handleUncaught(Thread t, Throwable e) {
-        LOGGER.error("=== UNCAUGHT EXCEPTION IN THREAD '{}' ===", t.getName(), e);
+        LOGGER.fatal("=== UNCAUGHT EXCEPTION IN THREAD '{}' ===", t.getName(), e);
         saveCrashDump(t, e);
         ApplicationInitializer.Shutdown(1);
     }
@@ -41,9 +41,13 @@ public class CrashHandler {
      * Handles caught exceptions.
      */
     public static void HandleException(Throwable e) {
-        LOGGER.error("=== CAUGHT EXCEPTION IN THREAD '{}' ===", Thread.currentThread().getName(), e);
-        saveCrashDump(Thread.currentThread(), e);
-        ApplicationInitializer.Shutdown(1);
+        if (e instanceof Error) {
+            LOGGER.fatal("=== CAUGHT FETAL EXCEPTION IN THREAD '{}' ===", Thread.currentThread().getName(), e);
+            saveCrashDump(Thread.currentThread(), e);
+            ApplicationInitializer.Shutdown(1);
+        } else {
+            LOGGER.error("=== CAUGHT EXCEPTION IN THREAD '{}' ===", Thread.currentThread().getName(), e);
+        }
     }
 
     /**
@@ -63,6 +67,9 @@ public class CrashHandler {
             e.printStackTrace(new PrintWriter(sw));
 
             StringBuilder report = new StringBuilder();
+            report.append("=== Fetal Error ===\n");
+            report.append("Opsies there was fetal crash\n\n");
+
             report.append("=== Vrglabs Engine Crash Report ===\n");
             report.append("Timestamp: ").append(timestamp).append("\n");
             report.append("Thread: ").append(t.getName()).append("\n\n");
