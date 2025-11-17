@@ -1,7 +1,7 @@
 package org.vrglab.imBoredEngine;
 
 import org.junit.jupiter.api.Test;
-import org.vrglab.imBoredEngine.core.platform.AppData;
+import org.vrglab.imBoredEngine.core.application.AppData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

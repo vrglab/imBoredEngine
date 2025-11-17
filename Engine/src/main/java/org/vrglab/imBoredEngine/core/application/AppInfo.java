@@ -1,4 +1,4 @@
-package org.vrglab.imBoredEngine.core.platform;
+package org.vrglab.imBoredEngine.core.application;
 
 import java.io.IOException;
 import java.nio.file.Files;

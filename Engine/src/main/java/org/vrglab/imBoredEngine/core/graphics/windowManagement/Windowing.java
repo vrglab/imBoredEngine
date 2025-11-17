@@ -1,10 +1,8 @@
 package org.vrglab.imBoredEngine.core.graphics.windowManagement;
 
 import io.github.libsdl4j.api.Sdl;
-import io.github.libsdl4j.api.SdlSubSystemConst;
 import io.github.libsdl4j.api.event.SDL_Event;
 import io.github.libsdl4j.api.video.SDL_Window;
-import io.github.libsdl4j.api.video.SDL_WindowFlags;
 import io.github.libsdl4j.api.video.SdlVideo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,13 +10,10 @@ import org.vrglab.imBoredEngine.core.game.GameLoader;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringLoop;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringShutdown;
-import org.vrglab.imBoredEngine.core.platform.AppInfo;
 
 import static io.github.libsdl4j.api.event.SDL_EventType.SDL_QUIT;
 import static io.github.libsdl4j.api.event.SdlEvents.SDL_PollEvent;
 import static io.github.libsdl4j.api.SdlSubSystemConst.SDL_INIT_VIDEO;
-import static io.github.libsdl4j.api.video.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
-import static io.github.libsdl4j.api.video.SDL_WindowFlags.SDL_WINDOW_SHOWN;
 import static io.github.libsdl4j.api.video.SdlVideo.SDL_CreateWindow;
 import static io.github.libsdl4j.api.video.SdlVideoConst.SDL_WINDOWPOS_CENTERED;
 
@@ -40,7 +35,7 @@ public class Windowing {
        }
         LOGGER.info("SDL2 initialized");
 
-        state = WindowState.Builder.create().canResize().fullscreen().width(1920).height(1080).build();
+        state = WindowState.Builder.create().canResize().width(1920).height(1080).build();
 
         windowInstance = SDL_CreateWindow(GameLoader.getAppInfo().getName(),
                 SDL_WINDOWPOS_CENTERED,

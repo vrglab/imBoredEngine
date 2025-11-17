@@ -1,4 +1,4 @@
-package org.vrglab.imBoredEngine.core.platform;
+package org.vrglab.imBoredEngine.core.application;
 
 import com.google.common.base.Suppliers;
 import org.apache.logging.log4j.LogManager;

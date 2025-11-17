@@ -3,11 +3,10 @@ package org.vrglab.imBoredEngine.core.game;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
-import org.vrglab.imBoredEngine.core.platform.AppData;
+import org.vrglab.imBoredEngine.core.application.AppData;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
-import org.vrglab.imBoredEngine.core.platform.AppInfo;
+import org.vrglab.imBoredEngine.core.application.AppInfo;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.vrglab.imBoredEngine.core.utils.IoUtils.hasFile;

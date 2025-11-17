@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.vrglab.imBoredEngine.core.game.GameLoader;
 import org.vrglab.imBoredEngine.core.initializer.ApplicationInitializer;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
-import org.vrglab.imBoredEngine.core.platform.AppData;
+import org.vrglab.imBoredEngine.core.application.AppData;
 
 import java.io.IOException;
 import java.io.PrintWriter;

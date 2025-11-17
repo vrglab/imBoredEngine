@@ -6,6 +6,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.vrglab.imBoredEngine.core.application.Threading;
 import org.vrglab.imBoredEngine.core.debugging.MemoryAppender;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.Windowing;
 import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 public class ApplicationInitializer {
 
@@ -46,6 +48,15 @@ public class ApplicationInitializer {
                     CrashHandler.HandleException(e);
                 }
             });
+
+            try {
+                Threading.general().submit(() -> {}).get();
+            } catch (InterruptedException e) {
+                CrashHandler.HandleException(e);
+            } catch (ExecutionException e) {
+                CrashHandler.HandleException(e);
+            }
+
         }
 
         Shutdown();
