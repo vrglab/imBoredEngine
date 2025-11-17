@@ -21,6 +21,10 @@ public class Threading {
             }
     );
 
+    private static final ExecutorService IO_POOL = Executors.newSingleThreadExecutor(
+            r -> new Thread(r, "IO Worker")
+    );
+
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(2);
 
     private static final ExecutorService SINGLE_BACKGROUND = Executors.newSingleThreadExecutor(
@@ -29,6 +33,11 @@ public class Threading {
 
     public static ExecutorService general() {
         return GENERAL_POOL;
+    }
+
+
+    public static ExecutorService io() {
+        return IO_POOL;
     }
 
     public static ScheduledExecutorService scheduler() {
@@ -49,6 +58,7 @@ public class Threading {
     private static void shutdown() {
         LOGGER.info("Shutting down Threading system...");
         GENERAL_POOL.shutdownNow();
+        IO_POOL.shutdownNow();
         SCHEDULER.shutdownNow();
         SINGLE_BACKGROUND.shutdownNow();
     }
