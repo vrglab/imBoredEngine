@@ -26,29 +26,33 @@ public class Windowing {
 
     private static final Logger LOGGER = LogManager.getLogger(Windowing.class);
 
-    private SDL_Window window_instance;
+    private SDL_Window windowInstance;
 
-    private boolean sdl_initialized = false, should_shutdown = false;
+    private WindowState state;
+
+    private boolean sdlInitialized = false, should_shutdown = false;
 
     private Windowing() {
        if(Sdl.SDL_Init(SDL_INIT_VIDEO) != 0) {
            throw new RuntimeException("Failed to initialize SDL");
        } else {
-           sdl_initialized = true;
+           sdlInitialized = true;
        }
         LOGGER.info("SDL2 initialized");
 
-        window_instance = SDL_CreateWindow(GameLoader.getAppInfo().getName(),
+        state = WindowState.Builder.create().canResize().fullscreen().width(1920).height(1080).build();
+
+        windowInstance = SDL_CreateWindow(GameLoader.getAppInfo().getName(),
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
-                1024, 768,
-                SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                state.getWidth(), state.getHeight(),
+                state.getFlags());
 
         LOGGER.info("Opened Window");
     }
 
 
-    public void PollEvents() {
+    public void pollEvents() {
         SDL_Event event = new SDL_Event();
         while(SDL_PollEvent(event) != 0) {
             switch(event.type) {
@@ -59,16 +63,16 @@ public class Windowing {
         }
     }
 
-    public boolean ShouldShutdown() {
+    public boolean shouldShutdown() {
         return should_shutdown;
     }
 
-    public void Quite() {
+    public void quite() {
         if(instance != null) {
-            SdlVideo.SDL_DestroyWindow(window_instance);
+            SdlVideo.SDL_DestroyWindow(windowInstance);
         }
 
-        if(sdl_initialized) {
+        if(sdlInitialized) {
             Sdl.SDL_Quit();
         }
     }
@@ -89,13 +93,13 @@ public class Windowing {
 
     @CalledDuringLoop(priority = 0)
     private static void Loop() {
-        instance.PollEvents();
+        instance.pollEvents();
     }
 
     @CalledDuringShutdown(priority = 0)
     private static void Shutdown() {
         if(instance != null) {
-            instance.Quite();
+            instance.quite();
         }
     }
 }

@@ -32,12 +32,12 @@ public class ApplicationInitializer {
     );
 
 
-    public static void App() {
-        init_Engine();
+    public static void app() {
+        initEngine();
 
-        Map<Integer, Method> loop_methods = init_loop();
+        Map<Integer, Method> loop_methods = initLoop();
 
-        while (!Windowing.getInstance().ShouldShutdown()){
+        while (!Windowing.getInstance().shouldShutdown()){
             loop_methods.forEach((priority, method) -> {
                 try {
                     method.setAccessible(true);
@@ -58,11 +58,11 @@ public class ApplicationInitializer {
     public static void Shutdown(int status) {
         LOGGER.info("===============================");
         LOGGER.info("Shutting down...");
-        shutdown_Engine();
+        shutdownEngine();
         System.exit(status);
     }
 
-    private static void init_Engine() {
+    private static void initEngine() {
         MemoryAppender.attach();
         Set<Method> methods = reflections.getMethodsAnnotatedWith(CalledDuringInit.class);
 
@@ -83,7 +83,7 @@ public class ApplicationInitializer {
         });
     }
 
-    public static Map<Integer, Method> init_loop() {
+    public static Map<Integer, Method> initLoop() {
         Set<Method> methods = reflections.getMethodsAnnotatedWith(CalledDuringLoop.class);
 
         Map<Integer, Method> methodMap = new TreeMap<>();
@@ -97,7 +97,7 @@ public class ApplicationInitializer {
     }
 
 
-    private static void shutdown_Engine() {
+    private static void shutdownEngine() {
         Set<Method> methods = reflections.getMethodsAnnotatedWith(CalledDuringShutdown.class);
 
         Map<Integer, Method> methodMap = new TreeMap<>();
