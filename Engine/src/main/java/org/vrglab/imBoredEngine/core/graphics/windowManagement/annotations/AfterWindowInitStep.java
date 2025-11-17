@@ -1,4 +1,5 @@
-package org.vrglab.imBoredEngine.core.initializer.interfaces;
+package org.vrglab.imBoredEngine.core.graphics.windowManagement.annotations;
+
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +8,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.METHOD})
-public @interface CalledDuringLoop {
+@SuppressWarnings("unused")
+public @interface AfterWindowInitStep {
     int priority() default 0;
 }

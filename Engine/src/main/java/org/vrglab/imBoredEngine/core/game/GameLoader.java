@@ -2,7 +2,7 @@ package org.vrglab.imBoredEngine.core.game;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
+import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.application.AppData;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.application.AppInfo;

@@ -4,8 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vrglab.imBoredEngine.core.game.GameLoader;
 import org.vrglab.imBoredEngine.core.initializer.ApplicationInitializer;
-import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
+import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.application.AppData;
+import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringShutdown;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,13 +31,18 @@ public class CrashHandler {
         Thread.currentThread().setUncaughtExceptionHandler(CrashHandler::handleUncaught);
     }
 
+    @CalledDuringShutdown(priority = 50)
+    private static void shutdown(){
+        saveLogs();
+    }
+
     /**
      * Handles uncaught exceptions.
      */
     private static void handleUncaught(Thread t, Throwable e) {
         LOGGER.fatal("=== UNCAUGHT EXCEPTION IN THREAD '{}' ===", t.getName(), e);
         saveCrashDump(t, e);
-        saveLogs();
+        saveCrashLogs();
         ApplicationInitializer.Shutdown(1);
     }
 
@@ -47,7 +53,7 @@ public class CrashHandler {
         if (e instanceof Error || e instanceof IllegalStateException) {
             LOGGER.fatal("=== CAUGHT FETAL EXCEPTION IN THREAD '{}' ===", Thread.currentThread().getName(), e);
             saveCrashDump(Thread.currentThread(), e);
-            saveLogs();
+            saveCrashLogs();
             ApplicationInitializer.Shutdown(1);
         } else {
             LOGGER.error("=== CAUGHT EXCEPTION IN THREAD '{}' ===", Thread.currentThread().getName(), e);
@@ -100,7 +106,7 @@ public class CrashHandler {
 
             report.append("===============================").append("\n\n");
             report.append("--- Stack Trace ---\n");
-            report.append(sw.toString());
+            report.append(sw);
 
             Files.writeString(dumpFile, report.toString());
             LOGGER.warn("Crash dump saved to {}", dumpFile.toAbsolutePath());
@@ -111,6 +117,27 @@ public class CrashHandler {
     }
 
     private static void saveLogs() {
+        try {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            Path dumpDir = Path.of(AppData.getRuntimePath() + "/logs");
+            if (!Files.exists(dumpDir)) {
+                Files.createDirectories(dumpDir);
+            }
+
+            Path dumpFile = dumpDir.resolve("log.log");
+
+            StringBuilder report = new StringBuilder();
+            report.append("\n--- Recent Logs ---\n");
+            report.append(MemoryAppender.getRecentLogs());
+            MemoryAppender.clear();
+
+            Files.writeString(dumpFile, report.toString());
+        } catch (IOException ioEx) {
+            LOGGER.error("Failed to save log", ioEx);
+        }
+    }
+
+    private static void saveCrashLogs() {
         try {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             Path dumpDir = Path.of(AppData.getRuntimePath() + "/logs");

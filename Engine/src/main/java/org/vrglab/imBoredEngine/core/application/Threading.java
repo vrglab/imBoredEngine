@@ -2,8 +2,8 @@ package org.vrglab.imBoredEngine.core.application;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringInit;
-import org.vrglab.imBoredEngine.core.initializer.interfaces.CalledDuringShutdown;
+import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
+import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringShutdown;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +25,10 @@ public class Threading {
             r -> new Thread(r, "IO Worker")
     );
 
+    private static final ExecutorService RENDERER = Executors.newSingleThreadExecutor(
+            r -> new Thread(r, "Renderer")
+    );
+
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(2);
 
     private static final ExecutorService SINGLE_BACKGROUND = Executors.newSingleThreadExecutor(
@@ -38,6 +42,10 @@ public class Threading {
 
     public static ExecutorService io() {
         return IO_POOL;
+    }
+
+    public static ExecutorService renderer() {
+        return RENDERER;
     }
 
     public static ScheduledExecutorService scheduler() {

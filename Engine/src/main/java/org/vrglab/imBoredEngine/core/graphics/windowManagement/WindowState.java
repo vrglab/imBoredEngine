@@ -78,8 +78,14 @@ public class WindowState {
             this.width = width;
             return this;
         }
+
         public Builder height(int height) {
             this.height = height;
+            return this;
+        }
+
+        public Builder flags(int flags) {
+            this.flags = flags;
             return this;
         }
 
