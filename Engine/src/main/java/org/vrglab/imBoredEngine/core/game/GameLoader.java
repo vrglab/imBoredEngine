@@ -6,6 +6,7 @@ import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.application.AppData;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.application.AppInfo;
+import org.vrglab.imBoredEngine.core.scripting.ScriptingEngine;
 
 import java.nio.file.Path;
 
@@ -30,10 +31,13 @@ public class GameLoader {
 
             } else {
                 LOGGER.warn("We are in Editor Environment, Loading in Editor mode");
-                Path app_info = Path.of(AppData.getRuntimePath()+"/project/" + "App.info");
-                if(hasFile(Path.of(AppData.getRuntimePath()+"/project"), "App.info")) {
-                    appInfo = new AppInfo(app_info);
+                String projectRootPath = AppData.getRuntimePath()+"/project";
+                Path app_info = Path.of(projectRootPath+"/" + "App.info");
 
+                if(hasFile(Path.of(projectRootPath), "App.info")) {
+                    appInfo = new AppInfo(app_info);
+                    ScriptingEngine.LoadScriptsFromDirectory(projectRootPath + "/src");
+                    //TODO: Load scripts and resources
                 } else {
                     throw new IllegalStateException("No Application Info file found");
                 }
