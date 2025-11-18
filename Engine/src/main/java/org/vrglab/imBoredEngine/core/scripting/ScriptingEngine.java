@@ -77,8 +77,6 @@ public class ScriptingEngine {
             compiledScripts.put(file.getName(), compile(in, file));
         });
 
-        callIfExists("init");
-
         LOGGER.info("Compiled scripts Successfully: {}", compiledScripts.size());
     }
 

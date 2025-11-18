@@ -17,16 +17,23 @@ public final class ReflectionsUtil {
 
     private final static String PACKAGES = "org.vrglab.imBoredEngine";
 
-    static Reflections reflections = new Reflections(
+    static Reflections methodsFinder = new Reflections(
             new ConfigurationBuilder()
                     .forPackage(PACKAGES)
                     .filterInputsBy(new FilterBuilder().includePackage(PACKAGES))
                     .setScanners(Scanners.MethodsAnnotated)
     );
 
+    static Reflections classesFinder = new Reflections(
+            new ConfigurationBuilder()
+                    .forPackage(PACKAGES)
+                    .filterInputsBy(new FilterBuilder().includePackage(PACKAGES))
+                    .setScanners(Scanners.TypesAnnotated)
+    );
+
 
     public static <T extends Annotation> Map<Integer, Method> findPrioritisedMethods(Class<T> annotationClass) {
-        Set<Method> methods = reflections.getMethodsAnnotatedWith(annotationClass);
+        Set<Method> methods = methodsFinder.getMethodsAnnotatedWith(annotationClass);
 
         Map<Integer, Method> methodMap = new TreeMap<>();
 
@@ -40,7 +47,11 @@ public final class ReflectionsUtil {
     }
 
     public static <T extends Annotation> Set<Method> findMethods(Class<T> annotationClass) {
-        return reflections.getMethodsAnnotatedWith(annotationClass);
+        return methodsFinder.getMethodsAnnotatedWith(annotationClass);
+    }
+
+    public static <T extends Annotation> Set<Class<?>> findClasses(Class<T> annotationClass) {
+        return classesFinder.getTypesAnnotatedWith(annotationClass);
     }
 
 
