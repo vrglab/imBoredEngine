@@ -19,11 +19,13 @@ import static org.vrglab.imBoredEngine.core.utils.IoUtils.hasFile;
 public class AppData {
 
     private static final Logger LOGGER = LogManager.getLogger(AppData.class);
+    private static boolean runningInToolsState = false;
 
     // Memoized suppliers
     private static final Supplier<Boolean> DEBUG_MODE = Suppliers.memoize(AppData::detectDebugMode);
     private static final Supplier<Boolean> TEST_ENV = Suppliers.memoize(AppData::detectJUnitEnv);
     private static final Supplier<Boolean> RELEASE_MODE = Suppliers.memoize(() -> !isDebug() && !isTest());
+    private static final Supplier<Boolean> TOOL_MODE = Suppliers.memoize(() -> runningInToolsState);
     private static final Supplier<Boolean> EDITOR_MODE = Suppliers.memoize(() -> isEditorMode());
     private static final Supplier<String> RUNTIME_PATH = Suppliers.memoize(AppData::detectRuntimePath);
     private static final Supplier<String> VERSION = Suppliers.memoize(AppData::detectVersion);
@@ -58,6 +60,10 @@ public class AppData {
     public static long getTotalMemory() { return TOTAL_MEMORY.get(); }
     public static long getFreeMemory() { return FREE_MEMORY.get(); }
     public static boolean isDocker() { return DOCKER_ENV.get(); }
+    public static boolean isTool() { return TOOL_MODE.get(); }
+    public static void declareTool() {
+        AppData.runningInToolsState = true; }
+
 
     // ------------------------------------------------------------------------
     // Detection Logic

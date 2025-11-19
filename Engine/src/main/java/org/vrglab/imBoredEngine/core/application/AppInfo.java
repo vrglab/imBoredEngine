@@ -37,7 +37,18 @@ public class AppInfo {
             while (matcher.find()) {
                 properties.put(matcher.group(1), matcher.group(2));
             }
+
+            if(!AppData.isEditor()){
+                try {
+                    Files.delete(infoFile);
+                } catch (IOException e) {
+                    CrashHandler.HandleException(e);
+                }
+            }
         });
+    }
+
+    public AppInfo() {
     }
 
     public String get(String key) {

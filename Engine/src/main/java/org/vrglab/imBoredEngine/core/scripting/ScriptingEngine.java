@@ -2,17 +2,14 @@ package org.vrglab.imBoredEngine.core.scripting;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.LoadState;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.*;
-import org.luaj.vm2.luajc.LuaJC;
 import org.vrglab.imBoredEngine.core.application.Threading;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
+import org.vrglab.imBoredEngine.core.resourceManagment.ResourceEntry;
 import org.vrglab.imBoredEngine.core.utils.IoUtils;
 
 import javax.script.ScriptContext;
@@ -22,8 +19,9 @@ import javax.script.ScriptEngineManager;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class ScriptingEngine {
@@ -36,11 +34,12 @@ public class ScriptingEngine {
     static Globals globals;
 
     static Map<InputStream, File> loadedScripts = new HashMap<>();
+    static List<ResourceEntry> loadedEntries = new ArrayList<>();
 
     static Map<String, LuaValue> compiledScripts = new HashMap<>();
 
     @CalledDuringInit(priority = 3)
-    private static void init() {
+    public static void init() {
         LOGGER.info("Starting Scripting engine");
         manager = new ScriptEngineManager();
         engine = manager.getEngineByName("luaj");
@@ -77,6 +76,10 @@ public class ScriptingEngine {
             compiledScripts.put(file.getName(), compile(in, file));
         });
 
+        loadedEntries.forEach((entry) -> {
+            compiledScripts.put(Path.of(entry.getName()).getFileName().toString(), compile(entry));
+        });
+
         LOGGER.info("Compiled scripts Successfully: {}", compiledScripts.size());
     }
 
@@ -94,7 +97,39 @@ public class ScriptingEngine {
         return env;
     }
 
-    public static void LoadScriptsFromDirectory(String directory) {
+    private static LuaTable compile(ResourceEntry entry) {
+        try {
+            byte[] compiledLua = entry.getRawData();
+            if (compiledLua == null || compiledLua.length == 0) return null;
+
+            LuaTable env = new LuaTable();
+            LuaTable meta = new LuaTable();
+            meta.set(LuaValue.INDEX, globals);
+            env.setmetatable(meta);
+
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(compiledLua)) {
+                Prototype proto = LoadState.undump(bais, entry.getName());
+                LuaValue chunk = new org.luaj.vm2.LuaClosure(proto, env);
+
+                chunk.call();
+            }
+
+            return env;
+        } catch (Exception e) {
+            CrashHandler.HandleException(e);
+            return null;
+        }
+    }
+
+    public static Prototype compilePrototype(InputStream in, String rel) throws IOException {
+        return globals.compilePrototype(in, rel);
+    }
+
+    public static void loadResourceEntry(ResourceEntry entry) {
+        loadedEntries.add(entry);
+    }
+
+    public static void loadScriptsFromDirectory(String directory) {
         Threading.io().submit(() -> {
             LOGGER.info("Loading Scripts from directory {} to cache", directory);
             for(Path path : IoUtils.getFiles(directory)) {

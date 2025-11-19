@@ -13,6 +13,6 @@ public class PngLoader extends ResourceLoader<Image> {
 
     @Override
     public Image load(byte[] fileContent) {
-        return ImageUtils.makeImage(fileContent);
+        return ImageCreator.makeImage(fileContent);
     }
 }

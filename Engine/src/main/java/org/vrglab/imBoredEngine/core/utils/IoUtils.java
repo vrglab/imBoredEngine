@@ -23,6 +23,17 @@ public final class IoUtils {
         }
     }
 
+    public static Path getFirstVibeFile(Path folder) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folder, "*.vibe")) {
+            for (Path file : stream) {
+                return file; // return first match
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; // no file found
+    }
+
     public static List<Path> getFiles(String path) {
         try {
           return Files.walk(Paths.get(path))

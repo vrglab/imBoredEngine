@@ -6,16 +6,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vrglab.imBoredEngine.core.application.Threading;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
+import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledAfterBGFXInit;
 import org.vrglab.imBoredEngine.core.initializer.ApplicationInitializer;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.resourceManagment.Annotations.ResourceLoaders;
 import org.vrglab.imBoredEngine.core.resourceManagment.interfaces.ResourceLoader;
+import org.vrglab.imBoredEngine.core.utils.IoUtils;
 import org.vrglab.imBoredEngine.core.utils.ReflectionsUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +30,9 @@ public class ResourceManager {
 
     private static Map<String, ResourceLoader> resourceLoaders = new HashMap();
     private static Cache<String, Resource> resourcesCache = CacheBuilder.newBuilder().build();
+
+    private static Map<Path, File> toBeLoadedResources = new HashMap<>();
+    private static Map<Path, ResourceEntry> toBeLoadedEntries = new HashMap<>();
 
     private final static ResourceLoader<String> DEFAULT_LOADER = new ResourceLoader() {
         @Override
@@ -53,23 +58,51 @@ public class ResourceManager {
         });
     }
 
+    @CalledAfterBGFXInit
+    private static void loadCachedResources() {
+        LOGGER.info("Loading cached Resources to Engine");
+        toBeLoadedResources.forEach((path, file) -> {
+            loadResource(file.getAbsolutePath());
+        });
+
+        toBeLoadedEntries.forEach((path, file) -> {
+            loadResource(file);
+        });
+    }
+
     public static <T> Resource<T> loadResource(String file) {
         if(resourcesCache.asMap().containsKey(file)) {
             return resourcesCache.getIfPresent(file);
         }
         File f = new File(file);
         ByteArrayOutputStream  outputStream = new ByteArrayOutputStream();
-        Threading.io().submit(() -> {
-            try {
-                outputStream.write(Files.readAllBytes(f.toPath()));
-            } catch (IOException e) {
-                CrashHandler.HandleException(e);
-            }
-        });
+        try {
+            outputStream.write(Files.readAllBytes(f.toPath()));
+        } catch (IOException e) {
+            CrashHandler.HandleException(e);
+        }
         ResourceLoader<T> loader = getFileResourceLoader(f.getAbsolutePath());
         T loaded = loader.load(outputStream.toByteArray());
         Resource<T> constructedResource = new Resource<T>(outputStream.toByteArray(),loaded, f, f.getName());
         resourcesCache.put(file, constructedResource);
+        return constructedResource;
+    }
+
+    public static <T> Resource<T> loadResource(ResourceEntry entry) {
+        Path name = Path.of(entry.getName()).getFileName();
+        if(resourcesCache.asMap().containsKey(String.valueOf(name))) {
+            return resourcesCache.getIfPresent(String.valueOf(name));
+        }
+        ByteArrayOutputStream  outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(entry.getRawData());
+        } catch (IOException e) {
+            CrashHandler.HandleException(e);
+        }
+        ResourceLoader<T> loader = getFileResourceLoader(String.valueOf(name));
+        T loaded = loader.load(outputStream.toByteArray());
+        Resource<T> constructedResource = new Resource<T>(outputStream.toByteArray(),loaded, null, String.valueOf(name));
+        resourcesCache.put(String.valueOf(name), constructedResource);
         return constructedResource;
     }
 
@@ -80,14 +113,31 @@ public class ResourceManager {
     private static ResourceLoader getFileResourceLoader(String file) {
         ResourceLoader loader = DEFAULT_LOADER;
         for (var resourceLoader : resourceLoaders.entrySet()) {
-            Pattern pattern = Pattern.compile(resourceLoader.getKey());
-            Matcher matcher = pattern.matcher(file);
+            String glob = "glob:" + resourceLoader.getKey();
+            PathMatcher matcher = FileSystems.getDefault().getPathMatcher(glob);
 
-            if(matcher.find()) {
+            if(matcher.matches(Path.of(file).getFileName())) {
                 loader = resourceLoader.getValue();
             }
         }
         return loader;
+    }
+
+    public static void loadResourceFromEntry(ResourceEntry entry) {
+        Threading.io().submit(()->{
+            Path name = Path.of(entry.getName()).getFileName();
+            toBeLoadedEntries.put(name, entry);
+        });
+    }
+
+    public static void loadResourcesFromDirectory(String directory) {
+        Threading.io().submit(()->{
+            LOGGER.info("Loading Resources from directory {} to cache", directory);
+            for(Path path : IoUtils.getFiles(directory)) {
+                toBeLoadedResources.put(path, path.toFile());
+            }
+            LOGGER.info("Cached {} Resources", toBeLoadedResources.size());
+        });
     }
 
     private static void loop() {

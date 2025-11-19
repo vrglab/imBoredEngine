@@ -1,5 +1,6 @@
 rootProject.name = 'ImBoredEngine'
 
+include 'VibeSecrets'
 include 'Engine'
 include 'VibeBuilder'
 include 'LevelBuilder'

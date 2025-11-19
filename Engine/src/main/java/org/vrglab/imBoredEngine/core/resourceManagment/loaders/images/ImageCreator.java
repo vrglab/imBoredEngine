@@ -2,6 +2,7 @@ package org.vrglab.imBoredEngine.core.resourceManagment.loaders.images;
 
 import org.lwjgl.bgfx.BGFX;
 import org.lwjgl.bgfx.BGFXMemory;
+import org.lwjgl.bgfx.BGFXReleaseFunctionCallback;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -9,8 +10,12 @@ import org.vrglab.imBoredEngine.core.resourceManagment.resourceTypes.Image;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ImageUtils {
+public class ImageCreator {
+
+    private static final Map<Long, BGFXReleaseFunctionCallback> callbacks = new ConcurrentHashMap<>();
 
     public static Image makeImage(byte[] fileContent){
         ByteBuffer imageBuffer = MemoryUtil.memAlloc(fileContent.length);

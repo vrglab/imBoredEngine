@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.bgfx.*;
 import org.vrglab.imBoredEngine.core.application.Threading;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
+import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledAfterBGFXInit;
 import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledDuringRenderLoop;
 import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledDuringRenderLoopPrioritized;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.WindowState;
@@ -52,18 +53,15 @@ public class BgfxManager {
                 .reset(BGFX_RESET_VSYNC));
         init.platformData(platformData);
 
-
-
-        if (!bgfx_init(init)) {
-            throw new RuntimeException("Failed to initialize bgfx!");
-        }
-
-        init.free();
-        caps = bgfx_get_caps();
-        stats = bgfx_get_stats();
-
-
         Threading.renderer().submit(()->{
+            if (!bgfx_init(init)) {
+                throw new RuntimeException("Failed to initialize bgfx!");
+            }
+
+            init.free();
+            caps = bgfx_get_caps();
+            stats = bgfx_get_stats();
+
             LOGGER.info("=== Rendering Engine Summery ===");
             LOGGER.info("Renderer: {}", bgfx_get_renderer_name(bgfx_get_renderer_type()));
             LOGGER.info("BGFX Version: {}", BGFX_API_VERSION);
@@ -78,6 +76,18 @@ public class BgfxManager {
             LOGGER.info("Supports Compute Shaders: {}" , (caps.supported() & BGFX.BGFX_CAPS_COMPUTE) != 0);
             LOGGER.info("===============================");
         });
+
+        Threading.general().submit(()->{
+            ReflectionsUtil.findMethods(CalledAfterBGFXInit.class).forEach((method) -> {
+                try {
+                    method.setAccessible(true);
+                    method.invoke(null);
+                } catch (Throwable e) {
+                    CrashHandler.HandleException(e);
+                }
+            });
+        });
+
     }
 
     @WindowStateUpdatedEvent
