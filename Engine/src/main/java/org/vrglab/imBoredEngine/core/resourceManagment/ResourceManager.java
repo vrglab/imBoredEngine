@@ -47,7 +47,7 @@ public class ResourceManager {
     };
 
 
-    @CalledDuringInit(priority = 6)
+    @CalledDuringInit(priority = 7)
     private static void init() {
         LOGGER.info("Starting Resource Manager");
        Set<Class<?>> resourcesLoadersFoundUninitialized = ReflectionsUtil.findClasses(ResourceLoaders.class);

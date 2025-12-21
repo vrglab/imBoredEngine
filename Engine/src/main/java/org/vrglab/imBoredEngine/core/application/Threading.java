@@ -62,7 +62,7 @@ public class Threading {
                 Runtime.getRuntime().availableProcessors());
     }
 
-    @CalledDuringShutdown(priority = 5)
+    @CalledDuringShutdown(priority = 2)
     private static void shutdown() {
         LOGGER.info("Shutting down Threading system...");
         GENERAL_POOL.shutdownNow();

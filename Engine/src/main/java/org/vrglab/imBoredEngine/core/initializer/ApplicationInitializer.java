@@ -26,12 +26,7 @@ public class ApplicationInitializer {
 
         while (!Windowing.getInstance().shouldShutdown()){
             loop_methods.forEach((priority, method) -> {
-                try {
-                    method.setAccessible(true);
-                    method.invoke(null);
-                } catch (Throwable e) {
-                    CrashHandler.HandleException(e);
-                }
+                ReflectionsUtil.invokeMethod(method);
             });
 
             try {
@@ -61,24 +56,14 @@ public class ApplicationInitializer {
     private static void initEngine() {
         MemoryAppender.attach();
         ReflectionsUtil.findPrioritisedMethods(CalledDuringInit.class).forEach((priority, method) -> {
-            try {
-                method.setAccessible(true);
-                method.invoke(null);
-            } catch (Throwable e) {
-                CrashHandler.HandleException(e);
-            }
+            ReflectionsUtil.invokeMethod(method);
         });
     }
 
 
     private static void shutdownEngine() {
         ReflectionsUtil.findPrioritisedMethods(CalledDuringShutdown.class).forEach((priority, method) -> {
-            try {
-                method.setAccessible(true);
-                method.invoke(null);
-            } catch (Throwable e) {
-                CrashHandler.HandleException(e);
-            }
+            ReflectionsUtil.invokeMethod(method);
         });
     }
 }

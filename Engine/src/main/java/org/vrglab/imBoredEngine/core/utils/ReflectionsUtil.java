@@ -1,9 +1,11 @@
 package org.vrglab.imBoredEngine.core.utils;
 
+import javassist.bytecode.MethodInfo;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -54,7 +56,15 @@ public final class ReflectionsUtil {
         return classesFinder.getTypesAnnotatedWith(annotationClass);
     }
 
-
+    public static Object invokeMethod(Method method, Object... args) {
+        try {
+            method.setAccessible(true);
+            return method.invoke(null);
+        } catch (Throwable e) {
+            CrashHandler.HandleException(e);
+            return null;
+        }
+    }
 
     public static <T> T getField(Object target, String fieldName, Class<T> type) {
         try {
