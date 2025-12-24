@@ -8,14 +8,18 @@ import io.github.libsdl4j.api.video.SDL_Window;
 import io.github.libsdl4j.api.video.SdlVideo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.vrglab.imBoredEngine.core.audio.AudioManager;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.game.GameLoader;
+import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledAfterBGFXInit;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.annotations.AfterWindowInitStep;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.annotations.BeforeWindowInitStep;
 import org.vrglab.imBoredEngine.core.graphics.windowManagement.annotations.WindowStateUpdatedEvent;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringLoop;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringShutdown;
+import org.vrglab.imBoredEngine.core.resourceManagment.ResourceManager;
+import org.vrglab.imBoredEngine.core.resourceManagment.resourceTypes.Audio;
 import org.vrglab.imBoredEngine.core.utils.ReflectionsUtil;
 
 import static io.github.libsdl4j.api.error.SdlError.SDL_GetError;

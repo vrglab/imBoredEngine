@@ -11,7 +11,9 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
+import static org.lwjgl.system.MemoryUtil.memAlloc;
 import static org.lwjgl.system.MemoryUtil.memAllocShort;
+import static org.vrglab.imBoredEngine.core.utils.MemoryUtils.NULL;
 
 @ResourceLoaders
 public class OggLoader extends ResourceLoader<Audio> {
@@ -23,7 +25,8 @@ public class OggLoader extends ResourceLoader<Audio> {
 
     @Override
     public Audio load(byte[] fileContent) {
-        ByteBuffer fileDataBuffer = ByteBuffer.wrap(fileContent);
+        ByteBuffer fileDataBuffer = memAlloc(fileContent.length);
+        fileDataBuffer.put(fileContent).flip();
         int channels, sampleRate, samples;
         ShortBuffer pcm;
 
@@ -31,9 +34,11 @@ public class OggLoader extends ResourceLoader<Audio> {
             IntBuffer errorBuffer = stack.mallocInt(1);
             long decoder = STBVorbis.stb_vorbis_open_memory(fileDataBuffer, errorBuffer, null);
 
+            if(decoder == NULL){
+                throw new RuntimeException("Failed to open memory STBVorbis");
+            }
 
-            STBVorbisInfo info = STBVorbisInfo.mallocStack(stack);
-            STBVorbis.stb_vorbis_get_info(decoder, info);
+            STBVorbisInfo info = STBVorbis.stb_vorbis_get_info(decoder, STBVorbisInfo.malloc(stack));
 
             channels = info.channels();
             sampleRate = info.sample_rate();

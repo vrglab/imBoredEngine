@@ -9,6 +9,8 @@ import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringShutdow
 import org.vrglab.imBoredEngine.core.resourceManagment.resourceTypes.Audio;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.vrglab.imBoredEngine.core.utils.MemoryUtils.*;
 
@@ -18,6 +20,9 @@ public class AudioManager {
 
     private static long device, context;
     private static ALCapabilities caps;
+
+    private static List<Integer> sources = new ArrayList<>();
+    private static List<Integer> buffers = new ArrayList<>();
 
 
     public static int prepareSource(Audio audio) {
@@ -31,7 +36,14 @@ public class AudioManager {
         AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
         AL10.alSourcef(source, AL10.AL_PITCH, 1.0f);
         AL10.alSource3f(source, AL10.AL_POSITION, 0f, 0f, 0f);
+
+        sources.add(source);
+        buffers.add(buffer);
         return source;
+    }
+
+    public static void play(Audio audio) {
+        AL10.alSourcePlay(audio.getSourceID());
     }
 
     @CalledDuringInit(priority = 6)
@@ -72,6 +84,13 @@ public class AudioManager {
 
     @CalledDuringShutdown(priority = 3)
     private static void shutdown() {
+        LOGGER.info("Shutting down Audio Manager...");
+        for(int buffer : buffers) {
+            AL10.alDeleteBuffers(buffer);
+        }
+        for(int source : sources) {
+            AL10.alDeleteSources(source);
+        }
         ALC10.alcCloseDevice(device);
         ALC10.alcDestroyContext(context);
         device = context = NULL;

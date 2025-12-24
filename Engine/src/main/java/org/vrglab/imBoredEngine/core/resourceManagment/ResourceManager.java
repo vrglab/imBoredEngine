@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.vrglab.imBoredEngine.core.application.Threading;
 import org.vrglab.imBoredEngine.core.debugging.CrashHandler;
 import org.vrglab.imBoredEngine.core.graphics.rendering.annotations.CalledAfterBGFXInit;
-import org.vrglab.imBoredEngine.core.initializer.ApplicationInitializer;
 import org.vrglab.imBoredEngine.core.initializer.annotations.CalledDuringInit;
 import org.vrglab.imBoredEngine.core.resourceManagment.Annotations.ResourceLoaders;
 import org.vrglab.imBoredEngine.core.resourceManagment.interfaces.ResourceLoader;
@@ -21,8 +20,7 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ResourceManager {
 
@@ -104,6 +102,18 @@ public class ResourceManager {
         Resource<T> constructedResource = new Resource<T>(outputStream.toByteArray(),loaded, null, String.valueOf(name));
         resourcesCache.put(String.valueOf(name), constructedResource);
         return constructedResource;
+    }
+
+    public static <T> T getResource(Class<T> type, String file) {
+        AtomicReference<Resource<T>> resource = new AtomicReference<>(resourcesCache.getIfPresent(file));
+        if(resource.get() == null) {
+            resourcesCache.asMap().forEach((key, value) -> {
+                if(value.getResourceName().equals(file)) {
+                    resource.set((Resource<T>) value);
+                }
+            });
+        }
+        return resource.get().getResourceData();
     }
 
     public static void invalidate(String file) {
